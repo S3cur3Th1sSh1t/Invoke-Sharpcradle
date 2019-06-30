@@ -14,7 +14,11 @@ Param
         [string]
         $uri,
 	    [string]
-        $arguments
+        $argument1,
+	[string]
+        $argument2,
+	[string]
+        $argument3
 )
 
 $cradle = @"
@@ -85,7 +89,21 @@ namespace SharpCradle
 "@
 
 Add-Type -TypeDefinition $cradle -Language CSharp
-
-[SharpCradle.Program]::Main("$uri", "$arguments")
+if ($argument1 -and $argument2 -and $argument3)
+{
+	[SharpCradle.Program]::Main("$uri", "$argument1", "$argument2", "$argument3")
+}
+elseif ($argument1 -and $argument2)
+{
+	[SharpCradle.Program]::Main("$uri", "$argument1", "$argument2")
+}
+elseif ($argument1)
+{
+	[SharpCradle.Program]::Main("$uri", "$argument1")
+}
+else
+{
+	[SharpCradle.Program]::Main("$uri")
+}
 
 }
